@@ -3,6 +3,7 @@ import Node from "./node.js";
 export default class Tree {
     constructor(array) {
         this.root = this.buildTree(array);
+        this.levelOrderTraversed = [];
     }
 
     buildTree(array) {
@@ -23,6 +24,64 @@ export default class Tree {
         return unique;
     }
 
+    insert(data, node = this.root) {
+        if (node == null) {
+            node = new Node(data);
+            return node;
+        }
+
+        if (data < node.data) {
+            node.leftChild = this.insert(data, node.leftChild);
+        } else if (data > node.data) {
+            node.rightChild = this.insert(data, node.rightChild);
+        }
+        return node;
+    }
+
+    delete(data, node = this.root) {
+        //base case of the recursive function
+        if (node == null) {
+            return node;
+        }
+        //if the data we want to delete is less than the data in the current node
+        //we want to recursively traverse the left tree node until we find the value
+        if (data < node.data) {
+            node.leftChild = this.delete(data, node.leftChild);
+        }
+        //if the data we want to delete is greater than the data in the current node
+        //we want to recursively traverse the right tree node until we find the value
+        else if (data > node.data) {
+            node.rightChild = this.delete(data, node.rightChild);
+        }
+        //when the data we want to delete is equal to the current node data then we have found our node
+        else {
+            //node with only one child or no chil
+            if (node.leftChild == null) {
+                return node.rightChild;
+            }
+            if (node.rightChild == null) {
+                return node.leftChild;
+            }
+
+            //if the node has both children
+            node.data = this.minValue(node.rightChild);
+            node.rightChild = this.delete(node.data, node.rightChild);
+        }
+        return node;
+    }
+
+    find(data, node = this.root) {
+        if (data === node.data) {
+            return node;
+        }
+        if (data < node.data) {
+            return this.find(data, node.leftChild)
+        }
+        if (data > node.data) {
+            return this.find(data, node.rightChild);
+        }
+    }
+
     sortedArrayToBST(array, startIndex, endIndex) {
         if (startIndex > endIndex) {
             return null;
@@ -32,5 +91,76 @@ export default class Tree {
         node.leftChild = this.sortedArrayToBST(array, startIndex, mid - 1);
         node.rightChild = this.sortedArrayToBST(array, mid + 1, endIndex);
         return node;
+    }
+
+    minValue(node) {
+        let minv = node.data;
+
+        while (node.leftChild != null) {
+            minv = node.leftChild.data;
+            node = node.leftChild;
+        }
+        return minv;
+    }
+
+    levelOrder(func = this.toArray) {
+        this.levelOrderTraversed = [];
+        if (this.root == null) return;
+        const queue = [];
+        queue.push(this.root);
+        console.log(queue.length);
+        while (queue.length > 0) {
+            const node = queue[0];
+            func(this.levelOrderTraversed, node.data);
+            if (node.leftChild != null) queue.push(node.leftChild);
+            if (node.rightChild != null) queue.push(node.rightChild);
+            queue.shift();
+        }
+        return this.levelOrderTraversed;
+    }
+
+    inorder() {
+        this.inorderTraversed = [];
+        return this.recInorder();
+    }
+
+    recInorder(func = this.toArray, node = this.root) {
+        if (node == null) return;
+        this.recInorder(func, node.leftChild);
+        func(this.inorderTraversed, node.data);
+        this.recInorder(func, node.rightChild);
+        return this.inorderTraversed;
+    }
+
+    preorder() {
+        this.preorderTraversed = [];
+        return this.recpreorder();
+    }
+
+    recpreorder(func = this.toArray, node = this.root) {
+        if (node == null) return;
+        func(this.preorderTraversed, node.data);
+        this.recpreorder(func, node.leftChild);
+        this.recpreorder(func, node.rightChild);
+
+        return this.preorderTraversed;
+    }
+
+    postorder() {
+        this.postorderTraversed = [];
+        return this.recpostorder();
+    }
+
+    recpostorder(func = this.toArray, node = this.root) {
+        if (node == null) return;
+        this.recpostorder(func, node.leftChild);
+        this.recpostorder(func, node.rightChild);
+        func(this.postorderTraversed, node.data);
+
+        return this.postorderTraversed;
+    }
+
+    toArray(arr, value) {
+        arr.push(value);
     }
 }

@@ -163,4 +163,34 @@ export default class Tree {
     toArray(arr, value) {
         arr.push(value);
     }
+
+    height(node) {
+        if (node === null) return 0;
+        const leftHeight = this.height(node.leftChild);
+        const rightHeight = this.height(node.rightChild);
+
+        return Math.max(leftHeight, rightHeight) + 1;
+    }
+
+    depth(data, node = this.root) {
+        if (data.data === node.data) return 0;
+        if (data.data < node.data) return this.depth(data, node.leftChild) + 1;
+        if (data.data > node.data) return this.depth(data, node.rightChild) + 1;
+    }
+
+    isBalanced() {
+        const allNodes = this.inorder();
+        for (let i = 0; i < allNodes.length; i++) {
+            const node = this.find(allNodes[i]);
+            const leftSubtreeHeight = this.height(node.leftChild);
+            const rightSubtreeHeight = this.height(node.rightChild);
+            if (Math.abs(leftSubtreeHeight - rightSubtreeHeight) > 1) return false;
+        }
+        return true;
+    }
+
+    rebalance() {
+        const currentTree = this.inorder();
+        this.buildTree(currentTree);
+    }
 }
